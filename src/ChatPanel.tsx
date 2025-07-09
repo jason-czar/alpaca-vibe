@@ -7,6 +7,7 @@ import BacktestPanel from './BacktestPanel';
 import PortfolioPanel from './PortfolioPanel';
 import CustomIndicatorPanel from './CustomIndicatorPanel';
 import StrategyTemplatePanel from './StrategyTemplatePanel';
+import AnalyticsDashboard from './AnalyticsDashboard';
 import { CustomIndicator } from './IndicatorBuilder';
 import type { TradingStrategy } from './StrategyEngine';
 
@@ -25,6 +26,7 @@ function ChatPanel({
   const [showPortfolio, setShowPortfolio] = useState(false);
   const [showCustomIndicators, setShowCustomIndicators] = useState(false);
   const [showStrategyTemplates, setShowStrategyTemplates] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Initialize Alpaca service (in demo mode for now)
@@ -127,6 +129,9 @@ function ChatPanel({
         } else if (userMessage.toLowerCase().includes('strategy template') || userMessage.toLowerCase().includes('bot template') || userMessage.toLowerCase().includes('trading strategy') || userMessage.toLowerCase().includes('pre-built bot') || userMessage.toLowerCase().includes('bot preset')) {
           setShowStrategyTemplates(true);
           botResponse = "🚀 **Strategy Templates & Bot Presets Opened!**\n\nI've opened the comprehensive strategy and bot template library for you. You can now:\n\n🤖 **Bot Templates:**\n• **Beginner Bots**: Conservative strategies perfect for learning\n• **Intermediate Bots**: Balanced risk/reward with trend following\n• **Advanced Bots**: High-frequency and scalping strategies\n• **Professional Bots**: Institutional-grade multi-strategy systems\n\n📊 **Strategy Library:**\n• **RSI Mean Reversion**: Buy oversold, sell overbought\n• **Moving Average Crossover**: Classic trend following\n• **Bollinger Band Breakout**: Volatility-based trading\n• **Custom Strategies**: Build your own from scratch\n\n✨ **Key Features:**\n• Pre-configured indicators and parameters\n• Risk management settings included\n• Educational tutorials for each strategy\n• Performance expectations and capital requirements\n• Difficulty levels from beginner to expert\n\n💡 **Perfect for:**\n• New traders wanting proven strategies\n• Experienced traders seeking new ideas\n• Anyone wanting to save setup time\n• Learning different trading approaches\n\nScroll down to explore the templates and find your perfect trading bot!";
+        } else if (userMessage.toLowerCase().includes('analytics') || userMessage.toLowerCase().includes('dashboard') || userMessage.toLowerCase().includes('performance analysis') || userMessage.toLowerCase().includes('advanced analytics') || userMessage.toLowerCase().includes('risk analysis')) {
+          setShowAnalytics(true);
+          botResponse = "📊 **Advanced Analytics Dashboard Opened!**\n\nI've launched the comprehensive analytics dashboard with institutional-grade performance analysis. You now have access to:\n\n📈 **Performance Analytics:**\n• Cumulative return charts vs benchmark\n• Rolling performance metrics\n• Period-by-period return analysis\n• Risk-adjusted performance ratios\n• Monthly and annual performance breakdowns\n\n⚠️ **Risk Analysis:**\n• Value at Risk (VaR) calculations\n• Drawdown analysis and underwater curves\n• Volatility decomposition and clustering\n• Beta analysis and correlation matrices\n• Downside risk metrics (Sortino, Pain Index)\n\n🎯 **Attribution Analysis:**\n• Sector and asset contribution analysis\n• Factor attribution (Market, Size, Value, Momentum)\n• Timing vs Selection performance breakdown\n• Interaction effects and currency impact\n\n⚡ **Efficiency Metrics:**\n• Sharpe, Sortino, Calmar ratios\n• Information ratio and tracking error\n• Up/Down capture ratios\n• Advanced efficiency measures\n\n🔧 **Custom Dashboard:**\n• Drag-and-drop widget builder\n• Personalized analytics views\n• Dashboard templates for different use cases\n• Real-time data refresh capabilities\n\n✨ **Professional Features:**\n• Benchmark comparison tools\n• Multiple timeframe analysis\n• Export capabilities for reports\n• Advanced charting and visualizations\n\nThis is the same level of analytics used by institutional investors and hedge funds. Perfect for serious traders who want deep insights into their performance!";
         } else if (!actions[0]?.success) {
           // Default response for unrecognized commands
           botResponse = actionResponse;
@@ -230,5 +235,12 @@ function ChatPanel({
         <StrategyTemplatePanel 
           onTemplateApplied={handleTemplateApplied}
           onClose={() => setShowStrategyTemplates(false)}
+        />
+      )}
+      
+      {/* Analytics Dashboard */}
+      {showAnalytics && (
+        <AnalyticsDashboard 
+          onClose={() => setShowAnalytics(false)}
         />
       )}
