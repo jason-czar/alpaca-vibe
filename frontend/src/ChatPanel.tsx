@@ -127,49 +127,84 @@ function ChatPanel({
   };
 
   return (
-    <section className="chat-panel" aria-label="Vibe Coding Chat Panel">
-      <h2 tabIndex={0}>Vibe Coding Chat</h2>
-      {loading && <div className="loading-overlay" aria-live="polite">Loading...</div>}
+    <section className="chat-panel">
+      <div className="chat-header">
+        <h1 className="chat-title">AI Assistant</h1>
+        <p className="chat-subtitle">Chat with your AI trading assistant to configure and optimize your bot</p>
+      </div>
+      
       {error && <div className="error-overlay" aria-live="polite">{error}</div>}
-      <div className="chat-messages" role="log" aria-live="polite" aria-label="Chat Messages">
+      
+      <div className="chat-messages">
         {messages.map((msg, i) => (
-          <div key={i} className={`chat-message ${msg.sender}`} role="article" tabIndex={0} aria-label={`${msg.sender === 'user' ? 'User' : 'Bot'} message`}>
-            <span>{msg.text}</span>
+          <div key={i} className={`chat-message ${msg.sender}`}>
+            {msg.text}
           </div>
         ))}
         <div ref={messagesEndRef} />
       </div>
-      <form className="chat-input-form" onSubmit={handleSend} aria-label="Chat Input">
+      
+      <div className="chat-input-container">
         <input
           type="text"
-          placeholder="Type your request..."
+          placeholder="Ask me anything about your trading bot..."
           value={input}
           onChange={e => setInput(e.target.value)}
           className="chat-input"
           disabled={loading}
-          aria-label="Chat input"
-          tabIndex={0}
+          onKeyPress={e => e.key === 'Enter' && !e.shiftKey && handleSend(e)}
         />
-        <button type="submit" className="chat-send-btn" disabled={loading} tabIndex={0}>Send</button>
-      </form>
-      <div className="backtest-section" aria-label="Backtest Section">
-        <button className="backtest-btn" onClick={handleBacktest} disabled={loading} tabIndex={0}>Run Backtest</button>
-        <div className="backtest-result" aria-live="polite">{backtestResult}</div>
+        <button 
+          onClick={handleSend} 
+          className="send-btn" 
+          disabled={loading || !input.trim()}
+        >
+          Send
+        </button>
       </div>
-      <div className="trading-section" aria-label="Trading Section">
-        <div className="trading-controls">
-          <button className="trading-btn start" onClick={handleStartTrading} disabled={trading || loading} tabIndex={0}>Start Trading</button>
-          <button className="trading-btn stop" onClick={handleStopTrading} disabled={!trading || loading} tabIndex={0}>Stop Trading</button>
+      
+      <div className="action-panels">
+        <div className="action-panel backtest">
+          <h3 className="action-title backtest">Backtest</h3>
+          <button 
+            className="action-btn backtest" 
+            onClick={handleBacktest} 
+            disabled={loading}
+          >
+            Run Backtest
+          </button>
+          <div className="action-result">
+            {backtestResult || 'No backtest results yet'}
+          </div>
         </div>
-        <div className="trade-logs" aria-label="Trade Logs and Performance">
-          <strong>Trade Logs & Performance:</strong>
-          <ul>
-            {tradeLogs.length === 0 ? (
-              <li className="trade-log-placeholder">No trades yet. (This is a placeholder.)</li>
-            ) : (
-              tradeLogs.map((log, i) => <li key={i} tabIndex={0}>{log}</li>)
-            )}
-          </ul>
+        
+        <div className="action-panel trading">
+          <h3 className="action-title trading">Live Trading</h3>
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+            <button 
+              className="action-btn start" 
+              onClick={handleStartTrading} 
+              disabled={trading || loading}
+            >
+              Start
+            </button>
+            <button 
+              className="action-btn stop" 
+              onClick={handleStopTrading} 
+              disabled={!trading || loading}
+            >
+              Stop
+            </button>
+          </div>
+          <div className="trade-logs">
+            <ul>
+              {tradeLogs.length === 0 ? (
+                <li className="trade-log-placeholder">No trades yet</li>
+              ) : (
+                tradeLogs.map((log, i) => <li key={i}>{log}</li>)
+              )}
+            </ul>
+          </div>
         </div>
       </div>
     </section>

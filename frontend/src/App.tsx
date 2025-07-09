@@ -3,8 +3,6 @@ import './App.css';
 import { apiLogin, apiSignup, apiGet, apiPost, apiDelete } from './api';
 import type { Indicator, IndicatorState } from './types';
 
-// const AuthModal = lazy(() => import('./AuthModal'));
-// const UserMenu = lazy(() => import('./UserMenu'));
 const BotBuilderPanel = lazy(() => import('./BotBuilderPanel'));
 const ChatPanel = lazy(() => import('./ChatPanel'));
 
@@ -49,30 +47,27 @@ const App: React.FC = () => {
   const [indicators, setIndicators] = useState<Indicator[]>([]);
   const [indicatorStates, setIndicatorStates] = useState<IndicatorState[]>([]);
   const [messages, setMessages] = useState([
-    { sender: 'bot', text: 'Hi! I am your Vibe Coding assistant. Describe what you want to change about your bot.' }
+    { sender: 'bot', text: 'Welcome to Vibe Coding Studio! I\'m your AI trading assistant. Let\'s build something amazing together. What would you like to configure for your trading bot?' }
   ]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Fetch bot config and indicators on login
   useEffect(() => {
-    if (!token) return;
+    // Simulate logged in state for demo
+    setUser('demo_user');
+    setToken('demo_token');
+    
     setLoading(true);
     setError(null);
-    Promise.all([
-      apiGet('/bot/config', token),
-      apiGet('/indicators', token)
-    ]).then(([botConfig, indicatorsList]) => {
-      setIndicators(indicatorsList);
-      if (botConfig && botConfig.indicators) {
-        setIndicatorStates(botConfig.indicators.map((ind: any) => ({ enabled: ind.enabled, value: ind.value })));
-      } else {
-        setIndicatorStates([]);
-      }
-    }).catch(() => {
-      setError('Failed to load bot config or indicators.');
-    }).finally(() => setLoading(false));
-  }, [token]);
+    
+    // Simulate API call with demo data
+    setTimeout(() => {
+      setIndicators(DEFAULT_INDICATORS);
+      setIndicatorStates(DEFAULT_INDICATORS.map(ind => ({ enabled: false, value: ind.default })));
+      setLoading(false);
+    }, 1000);
+  }, []);
 
   // Save bot config to backend when indicatorStates change (and user is logged in)
   useEffect(() => {
@@ -166,12 +161,32 @@ const App: React.FC = () => {
   }), [indicators, indicatorStates, setIndicatorStates, setMessages, messages, token]);
 
   return (
+    <>
+      <header className="studio-header">
+        <div className="studio-logo">
+          Vibe Coding Studio
+        </div>
+        <div className="studio-status">
+          <div className="status-indicator">
+            <div className="status-dot"></div>
+            <span>Connected</span>
+          </div>
+          <div className="status-indicator">
+            <span>Demo Mode</span>
+          </div>
+        </div>
+      </header>
     <div className="main-layout">
-      {loading && <div className="loading-overlay">Loading...</div>}
+      {loading && (
+        <div className="loading-overlay">
+          <div className="loading-spinner"></div>
+        </div>
+      )}
       {error && <div className="error-overlay">{error}</div>}
       <BotBuilderPanel {...botBuilderPanelProps} />
       <ChatPanel {...chatPanelProps} />
     </div>
+    </>
   );
 };
 
