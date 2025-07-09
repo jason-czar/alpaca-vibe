@@ -3,6 +3,7 @@ import type { Indicator, IndicatorState } from './types';
 import { apiPost } from './api';
 import { TradingActionProcessor } from './TradingActionProcessor';
 import { initializeAlpacaService } from './AlpacaService';
+import BacktestPanel from './BacktestPanel';
 
 function ChatPanel({
   indicators,
@@ -15,6 +16,7 @@ function ChatPanel({
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showBacktest, setShowBacktest] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Initialize Alpaca service (in demo mode for now)
@@ -105,6 +107,9 @@ function ChatPanel({
               ).join('\n') +
               '\n\nYou can adjust these by saying things like "Set RSI period to 25" or disable them with "Turn off MACD".';
           }
+        } else if (userMessage.toLowerCase().includes('backtest') || userMessage.toLowerCase().includes('test strategy')) {
+          setShowBacktest(true);
+          botResponse = "🔬 **Backtesting Panel Opened!**\n\nI've opened the advanced backtesting panel for you. You can now:\n\n• Configure your backtest parameters\n• Test your current indicator setup\n• Analyze historical performance\n• View detailed metrics and trade history\n\nThe backtest will use your currently active indicators to simulate trading over the past 6 months. Scroll down to see the backtesting interface!";
         } else if (!actions[0]?.success) {
           // Default response for unrecognized commands
           botResponse = actionResponse;
@@ -137,3 +142,10 @@ function ChatPanel({
     }
   };
 }
+      {/* Backtest Panel */}
+      {showBacktest && (
+        <BacktestPanel 
+          indicators={indicators} 
+          indicatorStates={indicatorStates}
+        />
+      )}
