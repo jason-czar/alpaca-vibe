@@ -6,7 +6,9 @@ import { initializeAlpacaService } from './AlpacaService';
 import BacktestPanel from './BacktestPanel';
 import PortfolioPanel from './PortfolioPanel';
 import CustomIndicatorPanel from './CustomIndicatorPanel';
+import StrategyTemplatePanel from './StrategyTemplatePanel';
 import { CustomIndicator } from './IndicatorBuilder';
+import type { TradingStrategy } from './StrategyEngine';
 
 function ChatPanel({
   indicators,
@@ -22,6 +24,7 @@ function ChatPanel({
   const [showBacktest, setShowBacktest] = useState(false);
   const [showPortfolio, setShowPortfolio] = useState(false);
   const [showCustomIndicators, setShowCustomIndicators] = useState(false);
+  const [showStrategyTemplates, setShowStrategyTemplates] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Initialize Alpaca service (in demo mode for now)
@@ -121,6 +124,9 @@ function ChatPanel({
         } else if (userMessage.toLowerCase().includes('custom indicator') || userMessage.toLowerCase().includes('create indicator') || userMessage.toLowerCase().includes('indicator builder')) {
           setShowCustomIndicators(true);
           botResponse = "🔧 **Custom Indicator Builder Opened!**\n\nI've opened the advanced indicator creation interface for you. You can now:\n\n• **Create**: Build custom indicators with mathematical formulas\n• **Library**: Manage your personal indicator collection\n• **Templates**: Start with pre-built indicator templates\n\n🛠️ **Features:**\n• Visual formula editor with syntax validation\n• Parameter configuration system\n• Built-in functions (SMA, EMA, RSI, MACD, etc.)\n• Performance impact analysis\n• Import/export capabilities\n• Template library with common patterns\n\n💡 **Examples:**\n• RSI Divergence Detector\n• Adaptive Volatility Index\n• Volume-Weighted Momentum\n• Custom Moving Average Crossovers\n\nScroll down to start building your custom indicators!";
+        } else if (userMessage.toLowerCase().includes('strategy template') || userMessage.toLowerCase().includes('bot template') || userMessage.toLowerCase().includes('trading strategy') || userMessage.toLowerCase().includes('pre-built bot') || userMessage.toLowerCase().includes('bot preset')) {
+          setShowStrategyTemplates(true);
+          botResponse = "🚀 **Strategy Templates & Bot Presets Opened!**\n\nI've opened the comprehensive strategy and bot template library for you. You can now:\n\n🤖 **Bot Templates:**\n• **Beginner Bots**: Conservative strategies perfect for learning\n• **Intermediate Bots**: Balanced risk/reward with trend following\n• **Advanced Bots**: High-frequency and scalping strategies\n• **Professional Bots**: Institutional-grade multi-strategy systems\n\n📊 **Strategy Library:**\n• **RSI Mean Reversion**: Buy oversold, sell overbought\n• **Moving Average Crossover**: Classic trend following\n• **Bollinger Band Breakout**: Volatility-based trading\n• **Custom Strategies**: Build your own from scratch\n\n✨ **Key Features:**\n• Pre-configured indicators and parameters\n• Risk management settings included\n• Educational tutorials for each strategy\n• Performance expectations and capital requirements\n• Difficulty levels from beginner to expert\n\n💡 **Perfect for:**\n• New traders wanting proven strategies\n• Experienced traders seeking new ideas\n• Anyone wanting to save setup time\n• Learning different trading approaches\n\nScroll down to explore the templates and find your perfect trading bot!";
         } else if (!actions[0]?.success) {
           // Default response for unrecognized commands
           botResponse = actionResponse;
@@ -181,6 +187,24 @@ function ChatPanel({
     ]);
   };
   };
+
+  const handleTemplateApplied = (indicators: Indicator[], indicatorStates: IndicatorState[], strategy: TradingStrategy) => {
+    // Apply the template to the current bot configuration
+    setIndicators(indicators);
+    setIndicatorStates(indicatorStates);
+
+    // Close the template panel
+    setShowStrategyTemplates(false);
+
+    // Add success message
+    setMessages(msgs => [
+      ...msgs,
+      { 
+        sender: 'bot', 
+        text: `✅ **${strategy.name} Applied Successfully!**\n\n🎯 **Strategy Details:**\n• **Type**: ${strategy.category.replace('_', ' ')}\n• **Indicators**: ${indicators.length} configured\n• **Risk Level**: ${strategy.validation.riskScore}/10\n• **Complexity**: ${strategy.validation.complexity}\n\n🔧 **What's Configured:**\n• All required indicators are enabled\n• Parameters set to optimal defaults\n• Risk management rules applied\n• Entry and exit conditions defined\n\n🚀 **Next Steps:**\n• Review the Bot Builder panel for your new configuration\n• Adjust parameters if needed\n• Run a backtest to see historical performance\n• Enable paper trading to test live\n\nYour bot is ready to trade with this proven strategy!` 
+      }
+    ]);
+  };
 }
       {/* Backtest Panel */}
       {showBacktest && (
@@ -198,5 +222,13 @@ function ChatPanel({
         <CustomIndicatorPanel 
           onIndicatorCreated={handleCustomIndicatorCreated}
           onClose={() => setShowCustomIndicators(false)}
+        />
+      )}
+      
+      {/* Strategy Template Panel */}
+      {showStrategyTemplates && (
+        <StrategyTemplatePanel 
+          onTemplateApplied={handleTemplateApplied}
+          onClose={() => setShowStrategyTemplates(false)}
         />
       )}
