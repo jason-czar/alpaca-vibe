@@ -5,6 +5,8 @@ import { TradingActionProcessor } from './TradingActionProcessor';
 import { initializeAlpacaService } from './AlpacaService';
 import BacktestPanel from './BacktestPanel';
 import PortfolioPanel from './PortfolioPanel';
+import CustomIndicatorPanel from './CustomIndicatorPanel';
+import { CustomIndicator } from './IndicatorBuilder';
 
 function ChatPanel({
   indicators,
@@ -19,6 +21,7 @@ function ChatPanel({
   const [error, setError] = useState<string | null>(null);
   const [showBacktest, setShowBacktest] = useState(false);
   const [showPortfolio, setShowPortfolio] = useState(false);
+  const [showCustomIndicators, setShowCustomIndicators] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Initialize Alpaca service (in demo mode for now)
@@ -115,6 +118,9 @@ function ChatPanel({
         } else if (userMessage.toLowerCase().includes('portfolio') || userMessage.toLowerCase().includes('positions') || userMessage.toLowerCase().includes('risk') || userMessage.toLowerCase().includes('allocation')) {
           setShowPortfolio(true);
           botResponse = "📊 **Portfolio Management Panel Opened!**\n\nI've opened the comprehensive portfolio management interface for you. You can now:\n\n• **Overview**: View all positions with real-time P&L\n• **Risk Analysis**: Assess portfolio risk and correlations\n• **Optimization**: Get rebalancing recommendations\n• **Attribution**: Analyze performance vs benchmark\n\n🔍 **Key Features:**\n• Real-time position tracking\n• Advanced risk metrics (VaR, correlation matrix)\n• Sector exposure analysis\n• Portfolio optimization suggestions\n• Performance attribution analysis\n\nScroll down to explore your portfolio analytics!";
+        } else if (userMessage.toLowerCase().includes('custom indicator') || userMessage.toLowerCase().includes('create indicator') || userMessage.toLowerCase().includes('indicator builder')) {
+          setShowCustomIndicators(true);
+          botResponse = "🔧 **Custom Indicator Builder Opened!**\n\nI've opened the advanced indicator creation interface for you. You can now:\n\n• **Create**: Build custom indicators with mathematical formulas\n• **Library**: Manage your personal indicator collection\n• **Templates**: Start with pre-built indicator templates\n\n🛠️ **Features:**\n• Visual formula editor with syntax validation\n• Parameter configuration system\n• Built-in functions (SMA, EMA, RSI, MACD, etc.)\n• Performance impact analysis\n• Import/export capabilities\n• Template library with common patterns\n\n💡 **Examples:**\n• RSI Divergence Detector\n• Adaptive Volatility Index\n• Volume-Weighted Momentum\n• Custom Moving Average Crossovers\n\nScroll down to start building your custom indicators!";
         } else if (!actions[0]?.success) {
           // Default response for unrecognized commands
           botResponse = actionResponse;
@@ -145,6 +151,35 @@ function ChatPanel({
     } finally {
       setLoading(false);
     }
+  const handleCustomIndicatorCreated = (indicator: CustomIndicator) => {
+    // Convert custom indicator to standard indicator format
+    const standardIndicator = {
+      name: indicator.name,
+      param: indicator.parameters.length > 0 ? indicator.parameters[0].name : 'Value',
+      min: indicator.parameters.length > 0 ? indicator.parameters[0].min || 0 : 0,
+      max: indicator.parameters.length > 0 ? indicator.parameters[0].max || 100 : 100,
+      default: indicator.parameters.length > 0 ? indicator.parameters[0].defaultValue : 50,
+      step: indicator.parameters.length > 0 ? indicator.parameters[0].step || 1 : 1,
+      custom: true,
+      customId: indicator.id
+    };
+
+    // Add to indicators list
+    setIndicators(prev => [...prev, standardIndicator]);
+    setIndicatorStates(prev => [...prev, { enabled: false, value: standardIndicator.default }]);
+
+    // Close the custom indicator panel
+    setShowCustomIndicators(false);
+
+    // Add success message
+    setMessages(msgs => [
+      ...msgs,
+      { 
+        sender: 'bot', 
+        text: `✅ **Custom Indicator Created Successfully!**\n\n"${indicator.name}" has been added to your indicator library. You can now:\n\n• Enable it in the Bot Builder panel\n• Configure its parameters\n• Use it in backtesting\n• Include it in your trading strategies\n\nThe indicator is ready to use with ${indicator.parameters.length} configurable parameter${indicator.parameters.length !== 1 ? 's' : ''}!` 
+      }
+    ]);
+  };
   };
 }
       {/* Backtest Panel */}
@@ -157,3 +192,11 @@ function ChatPanel({
       
       {/* Portfolio Panel */}
       {showPortfolio && <PortfolioPanel />}
+      
+      {/* Custom Indicator Panel */}
+      {showCustomIndicators && (
+        <CustomIndicatorPanel 
+          onIndicatorCreated={handleCustomIndicatorCreated}
+          onClose={() => setShowCustomIndicators(false)}
+        />
+      )}
