@@ -4,6 +4,7 @@ import { apiPost } from './api';
 import { TradingActionProcessor } from './TradingActionProcessor';
 import { initializeAlpacaService } from './AlpacaService';
 import BacktestPanel from './BacktestPanel';
+import PortfolioPanel from './PortfolioPanel';
 
 function ChatPanel({
   indicators,
@@ -17,6 +18,7 @@ function ChatPanel({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showBacktest, setShowBacktest] = useState(false);
+  const [showPortfolio, setShowPortfolio] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Initialize Alpaca service (in demo mode for now)
@@ -110,6 +112,9 @@ function ChatPanel({
         } else if (userMessage.toLowerCase().includes('backtest') || userMessage.toLowerCase().includes('test strategy')) {
           setShowBacktest(true);
           botResponse = "🔬 **Backtesting Panel Opened!**\n\nI've opened the advanced backtesting panel for you. You can now:\n\n• Configure your backtest parameters\n• Test your current indicator setup\n• Analyze historical performance\n• View detailed metrics and trade history\n\nThe backtest will use your currently active indicators to simulate trading over the past 6 months. Scroll down to see the backtesting interface!";
+        } else if (userMessage.toLowerCase().includes('portfolio') || userMessage.toLowerCase().includes('positions') || userMessage.toLowerCase().includes('risk') || userMessage.toLowerCase().includes('allocation')) {
+          setShowPortfolio(true);
+          botResponse = "📊 **Portfolio Management Panel Opened!**\n\nI've opened the comprehensive portfolio management interface for you. You can now:\n\n• **Overview**: View all positions with real-time P&L\n• **Risk Analysis**: Assess portfolio risk and correlations\n• **Optimization**: Get rebalancing recommendations\n• **Attribution**: Analyze performance vs benchmark\n\n🔍 **Key Features:**\n• Real-time position tracking\n• Advanced risk metrics (VaR, correlation matrix)\n• Sector exposure analysis\n• Portfolio optimization suggestions\n• Performance attribution analysis\n\nScroll down to explore your portfolio analytics!";
         } else if (!actions[0]?.success) {
           // Default response for unrecognized commands
           botResponse = actionResponse;
@@ -149,3 +154,6 @@ function ChatPanel({
           indicatorStates={indicatorStates}
         />
       )}
+      
+      {/* Portfolio Panel */}
+      {showPortfolio && <PortfolioPanel />}
