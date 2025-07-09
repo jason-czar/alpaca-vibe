@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import type { Indicator, IndicatorState } from './types';
 import { apiPost } from './api';
-import { ActionProcessor } from './ActionProcessor';
+import { TradingActionProcessor } from './TradingActionProcessor';
+import { initializeAlpacaService } from './AlpacaService';
 
 function ChatPanel({
   indicators,
@@ -16,8 +17,19 @@ function ChatPanel({
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  // Create action processor instance
-  const actionProcessor = new ActionProcessor(
+  // Initialize Alpaca service (in demo mode for now)
+  useEffect(() => {
+    // Initialize with demo/paper trading credentials
+    // In production, these would come from environment variables or user settings
+    initializeAlpacaService({
+      apiKey: process.env.REACT_APP_ALPACA_API_KEY || 'demo_key',
+      secretKey: process.env.REACT_APP_ALPACA_SECRET_KEY || 'demo_secret',
+      paper: true, // Always use paper trading for demo
+    });
+  }, []);
+
+  // Create trading action processor instance
+  const actionProcessor = new TradingActionProcessor(
     indicators,
     indicatorStates,
     setIndicatorStates,
@@ -46,7 +58,7 @@ function ChatPanel({
     
     try {
       // Process the message for actions
-      const { response: actionResponse, actions } = actionProcessor.processMessage(userMessage);
+      const { response: actionResponse, actions } = await actionProcessor.processMessage(userMessage);
       
       // Create bot response with action results
       let botResponse = actionResponse;
@@ -65,11 +77,20 @@ function ChatPanel({
 • You have ${indicators.length} available indicators
 • ${indicatorStates.filter(s => s.enabled).length} are currently active
 
+📈 **Trading Commands:**
+• Buy/Sell stocks: "Buy 10 AAPL" or "Sell 5 TSLA at $300"
+• Get quotes: "What's MSFT price?" or "Get GOOGL quote"
+• Check positions: "Show my positions" or "Show my account"
+• Market status: "Is market open?"
+
 💡 **Try saying:**
 • "Enable Bollinger Bands"
 • "Set MACD fast EMA to 15"
 • "Show me my active indicators"
-• "Disable all indicators"`;
+• "Disable all indicators"
+• "Buy 10 shares of Apple"
+• "What's Tesla's current price?"
+• "Show my account balance"`;
         } else if (userMessage.toLowerCase().includes('status') || userMessage.toLowerCase().includes('active')) {
           const activeIndicators = indicators
             .map((ind, idx) => ({ ...ind, ...indicatorStates[idx] }))

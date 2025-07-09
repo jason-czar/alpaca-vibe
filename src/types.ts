@@ -8,4 +8,3 @@ export type ChatMessage = {
   text: string;
   timestamp?: Date;
   actions?: any[];
-};
